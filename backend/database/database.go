@@ -10,14 +10,15 @@ import (
 var DB *gorm.DB
 
 func ConnectDb() {
-	db, err := gorm.Open(sqlite.Open("todo.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("todo.db?_foreign_keys=true"), &gorm.Config{})
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	db.AutoMigrate(&models.UserModel{}, &models.Todo{})
+	db.AutoMigrate(&models.UserModel{})
+	db.AutoMigrate(&models.Todo{})
 
 	DB = db
 }

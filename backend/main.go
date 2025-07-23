@@ -34,6 +34,7 @@ func main() {
 	todos.Get("/get", routes.GetTodo)
 	todos.Delete("/delete/:id", routes.DeleteTodo)
 	todos.Post("/update", routes.UpdateTodo)
+	todos.Delete("/delete", routes.DeleteAccount)
 
 	app.Listen(":4000")
 }

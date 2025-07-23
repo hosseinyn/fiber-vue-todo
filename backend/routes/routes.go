@@ -34,7 +34,7 @@ func Register(c *fiber.Ctx) error {
 		Password: hashed_password,
 	}
 
-	result := database.DB.Create(&userRecord).Error
+	result := database.DB.Create(&userRecord)
 	if result.Error != nil {
 		fmt.Println(result.Error)
 	}
@@ -86,9 +86,23 @@ func AddTodo(c *fiber.Ctx) error {
 
 	err := c.BodyParser(&todo)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Bad request"})
 	}
+
+	var userRecord models.UserModel
+
+	if user := c.Locals("user").(*jwt.Token); user == nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+
+	err = database.DB.Where("username = ?", name).First(&userRecord).Error
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
+	}
+	todo.TargetUserID = userRecord.ID
 
 	database.DB.Create(&todo)
 
@@ -98,7 +112,20 @@ func AddTodo(c *fiber.Ctx) error {
 func GetTodo(c *fiber.Ctx) error {
 	var todo []models.Todo
 
-	result := database.DB.Find(&todo)
+	if user := c.Locals("user").(*jwt.Token); user == nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+
+	var userRecord models.UserModel
+	result := database.DB.Where("username = ?", name).First(&userRecord)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
+	}
+
+	result = database.DB.Where("target_user_id = ?", userRecord.ID).Find(&todo)
 	if result.Error != nil {
 		fmt.Println(result.Error)
 	}
@@ -110,9 +137,25 @@ func DeleteTodo(c *fiber.Ctx) error {
 	var targetID = c.Params("id")
 	var todo models.Todo
 
-	result := database.DB.First(&todo, targetID).Delete(targetID)
+	if user := c.Locals("user").(*jwt.Token); user == nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+
+	var userRecord models.UserModel
+
+	result := database.DB.Where("username = ?", name).First(&userRecord)
 	if result.Error != nil {
-		fmt.Println(result.Error)
+		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
+	}
+
+	todo.TargetUserID = userRecord.ID
+
+	result = database.DB.First(&todo, targetID).Delete(targetID)
+	if result.Error != nil {
+		return c.Status(404).JSON(fiber.Map{"error": "Todo not found"})
 	}
 	return c.Status(200).JSON(fiber.Map{"message": "Todo deleted successfully"})
 }
@@ -125,12 +168,48 @@ func UpdateTodo(c *fiber.Ctx) error {
 		fmt.Println(err)
 	}
 
+	if user := c.Locals("user").(*jwt.Token); user == nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+
+	var userRecord models.UserModel
+	result := database.DB.Where("username = ?", name).First(&userRecord)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
+	}
+
 	database.DB.First(&todo, reqTodo.ID)
+	if todo.TargetUserID != userRecord.ID {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+
 	todo.ID = reqTodo.ID
 	todo.Title = reqTodo.Title
 	todo.Done = reqTodo.Done
+	todo.TargetUserID = userRecord.ID
 
 	database.DB.Save(&todo)
 
 	return c.Status(200).JSON(fiber.Map{"message": "Todo updated successfully"})
+}
+
+func DeleteAccount(c *fiber.Ctx) error {
+	if user := c.Locals("user").(*jwt.Token); user == nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+
+	var userRecord models.UserModel
+
+	result := database.DB.Where("username = ?", name).Delete(&userRecord)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"message": "Account deleted successfully"})
 }
