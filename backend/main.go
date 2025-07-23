@@ -3,6 +3,7 @@ package main
 import (
 	"backend/database"
 	"backend/routes"
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -11,9 +12,23 @@ func main() {
 
 	database.ConnectDb()
 
+	// Auth api
+	auth := app.Group("/auth")
+
+	auth.Post("/register", routes.Register)
+	auth.Post("/login", routes.Login)
+
 	// Todo api
 
-	todos := app.Group("/todos")
+	// Secret key is only for test and this isn't secure!
+	todos := app.Group("/todos", jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{Key: []byte("secret_key")},
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Bad Token",
+			})
+		},
+	}))
 
 	todos.Post("/add", routes.AddTodo)
 	todos.Get("/get", routes.GetTodo)

@@ -3,9 +3,77 @@ package routes
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
+	"time"
 )
+import "golang.org/x/crypto/bcrypt"
 import "backend/database"
 import "backend/models"
+
+// Register Authentication routes
+func Register(c *fiber.Ctx) error {
+	//username := c.FormValue("username")
+	//pass := c.FormValue("password")
+
+	var userData models.UserModel
+
+	err := c.BodyParser(&userData)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//user_record.Username = username
+	bytes, err := bcrypt.GenerateFromPassword([]byte(userData.Password), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println(err)
+	}
+	hashed_password := string(bytes)
+
+	var userRecord = models.UserModel{
+		Username: userData.Username,
+		Password: hashed_password,
+	}
+
+	result := database.DB.Create(&userRecord).Error
+	if result.Error != nil {
+		fmt.Println(result.Error)
+	}
+
+	return c.JSON(fiber.Map{"message": "Account created successfully"})
+}
+
+func Login(c *fiber.Ctx) error {
+	username := c.FormValue("username")
+	pass := c.FormValue("password")
+
+	var userRecord models.UserModel
+	result := database.DB.Where("username = ?", username).First(&userRecord)
+	if result.Error != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Username or password is not correct"})
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(userRecord.Password), []byte(pass))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Create the Claims
+	claims := jwt.MapClaims{
+		"name": username,
+		"exp":  time.Now().Add(time.Hour * 72).Unix(),
+	}
+
+	// Create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString([]byte("secret_key"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return c.JSON(fiber.Map{"token": t})
+}
 
 func AddTodo(c *fiber.Ctx) error {
 	var todo models.Todo
@@ -40,7 +108,6 @@ func DeleteTodo(c *fiber.Ctx) error {
 	if result.Error != nil {
 		fmt.Println(result.Error)
 	}
-
 	return c.Status(200).JSON(fiber.Map{"message": "Todo deleted successfully"})
 }
 

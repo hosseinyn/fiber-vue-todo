@@ -17,7 +17,7 @@ func ConnectDb() {
 		return
 	}
 
-	db.AutoMigrate(&models.Todo{})
+	db.AutoMigrate(&models.UserModel{}, &models.Todo{})
 
 	DB = db
 }
