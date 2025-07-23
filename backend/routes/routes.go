@@ -43,23 +43,29 @@ func Register(c *fiber.Ctx) error {
 }
 
 func Login(c *fiber.Ctx) error {
-	username := c.FormValue("username")
-	pass := c.FormValue("password")
+	//username := c.FormValue("username")
+	//pass := c.FormValue("password")
 
 	var userRecord models.UserModel
-	result := database.DB.Where("username = ?", username).First(&userRecord)
+
+	err := c.BodyParser(&userRecord)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result := database.DB.Where("username = ?", userRecord.Username).First(&userRecord)
 	if result.Error != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Username or password is not correct"})
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(userRecord.Password), []byte(pass))
+	err = bcrypt.CompareHashAndPassword([]byte(userRecord.Password), []byte(userRecord.Password))
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	// Create the Claims
 	claims := jwt.MapClaims{
-		"name": username,
+		"name": userRecord.Username,
 		"exp":  time.Now().Add(time.Hour * 72).Unix(),
 	}
 
