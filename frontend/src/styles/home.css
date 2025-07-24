@@ -1,0 +1,15 @@
+body, header {
+  background-color: #1a1f35;
+}
+
+button {
+  background-color: #1a49c8;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.6s;
+}
+
+button:hover {
+  background-color: #1a1f35;
+}/*# sourceMappingURL=home.css.map */

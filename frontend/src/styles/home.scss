@@ -1,0 +1,17 @@
+@import "_colors";
+
+body , header{
+    background-color: $dark_blue;
+}
+
+button{
+    background-color: $blue;
+    color: $white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.6s;
+}
+
+button:hover{
+    background-color: $dark_blue;
+}
