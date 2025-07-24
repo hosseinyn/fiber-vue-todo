@@ -46,21 +46,23 @@ func Login(c *fiber.Ctx) error {
 	//username := c.FormValue("username")
 	//pass := c.FormValue("password")
 
-	var userRecord models.UserModel
+	var userData models.UserModel
 
-	err := c.BodyParser(&userRecord)
+	err := c.BodyParser(&userData)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	result := database.DB.Where("username = ?", userRecord.Username).First(&userRecord)
+	var userRecord models.UserModel
+
+	result := database.DB.Where("username = ?", userData.Username).First(&userRecord)
 	if result.Error != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Username or password is not correct"})
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(userRecord.Password), []byte(userRecord.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(userRecord.Password), []byte(userData.Password))
 	if err != nil {
-		fmt.Println(err)
+		return c.Status(500).JSON(fiber.Map{"error": "Username or password is not correct"})
 	}
 
 	// Create the Claims
@@ -212,4 +214,48 @@ func DeleteAccount(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"message": "Account deleted successfully"})
+}
+
+func ChangePassword(c *fiber.Ctx) error {
+	var reqBody models.ChangePassword
+	err := c.BodyParser(&reqBody)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Bad Request"})
+	}
+
+	if user := c.Locals("user").(*jwt.Token); user == nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized no token"})
+	}
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+
+	if name != reqBody.Username {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized username"})
+	}
+
+	var userRecord models.UserModel
+
+	result := database.DB.Where("username = ?", name).First(&userRecord)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
+	}
+
+	fmt.Println(reqBody.CurrentPassword)
+	fmt.Println(userRecord.Password)
+
+	err = bcrypt.CompareHashAndPassword([]byte(userRecord.Password), []byte(reqBody.CurrentPassword))
+	if err != nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized password"})
+	} else {
+		bytes, err := bcrypt.GenerateFromPassword([]byte(reqBody.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			fmt.Println(err)
+		}
+		hashed_password := string(bytes)
+		userRecord.Password = hashed_password
+		database.DB.Save(&userRecord)
+	}
+
+	return c.Status(200).JSON(fiber.Map{"message": "Password changed"})
 }

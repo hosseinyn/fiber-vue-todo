@@ -5,3 +5,9 @@ type UserModel struct {
 	Username string `gorm:"uniqueIndex;not null"`
 	Password string `json:"password" gorm:"not null"`
 }
+
+type ChangePassword struct {
+	Username        string `json:"username"`
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+}
