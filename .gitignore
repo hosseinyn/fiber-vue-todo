@@ -1,2 +1,4 @@
 backend/todo.db
 backend/.idea
+frontend/node_modules
+.vscode
