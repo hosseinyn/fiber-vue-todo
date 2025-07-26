@@ -259,3 +259,21 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"message": "Password changed"})
 }
+
+func CheckToken(c *fiber.Ctx) error {
+	if user := c.Locals("user").(*jwt.Token); user == nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+
+	var userRecord models.UserModel
+
+	result := database.DB.Where("username = ?", name).First(&userRecord)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"message": "Token is valid"})
+}

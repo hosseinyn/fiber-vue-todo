@@ -36,6 +36,7 @@ func main() {
 	todos.Post("/update", routes.UpdateTodo)
 	todos.Delete("/delete-account", routes.DeleteAccount)
 	todos.Post("/change-password", routes.ChangePassword)
+	todos.Get("/check-token", routes.CheckToken)
 
 	app.Listen(":4000")
 }
