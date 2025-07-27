@@ -15,13 +15,13 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
                 <ul
                     class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400">
                     <li>
-                        <a href="/" class="hover:underline me-4 md:me-6">Home <FontAwesomeIcon :icon="faHome" /></a>
+                        <RouterLink to="/" class="hover:underline me-4 md:me-6">Home <FontAwesomeIcon :icon="faHome" /></RouterLink>
                     </li>
                     <li>
-                        <a href="/login" class="hover:underline me-4 md:me-6">Login <FontAwesomeIcon :icon="faRightToBracket" /></a>
+                        <RouterLink to="/login" class="hover:underline me-4 md:me-6">Login <FontAwesomeIcon :icon="faRightToBracket" /></RouterLink>
                     </li>
                     <li>
-                        <a href="/signup" class="hover:underline me-4 md:me-6">Register <FontAwesomeIcon :icon="faUser" /></a>
+                        <RouterLink to="/signup" class="hover:underline me-4 md:me-6">Register <FontAwesomeIcon :icon="faUser" /></RouterLink>
                     </li>
                     <li>
                         <a href="https://github.com/hosseinyn/fiber-vue-todo" class="hover:underline">About the project <FontAwesomeIcon :icon="faFile" /></a>
