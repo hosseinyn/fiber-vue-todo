@@ -5,12 +5,18 @@ import (
 	"backend/routes"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
 	var app = fiber.New(fiber.Config{AppName: "Fiber/Vue Todo App"})
 
 	database.ConnectDb()
+
+	// CORS configuration
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:5173 , http://127.0.0.1:4000",
+	}))
 
 	// Auth api
 	auth := app.Group("/auth")
