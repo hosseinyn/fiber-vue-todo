@@ -21,10 +21,10 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
                         <a href="/login" class="hover:underline me-4 md:me-6">Login <FontAwesomeIcon :icon="faRightToBracket" /></a>
                     </li>
                     <li>
-                        <a href="/register" class="hover:underline me-4 md:me-6">Register <FontAwesomeIcon :icon="faUser" /></a>
+                        <a href="/signup" class="hover:underline me-4 md:me-6">Register <FontAwesomeIcon :icon="faUser" /></a>
                     </li>
                     <li>
-                        <a href="#" class="hover:underline">About the project <FontAwesomeIcon :icon="faFile" /></a>
+                        <a href="https://github.com/hosseinyn/fiber-vue-todo" class="hover:underline">About the project <FontAwesomeIcon :icon="faFile" /></a>
                     </li>
                 </ul>
             </div>
