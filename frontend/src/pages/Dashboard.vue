@@ -231,7 +231,8 @@ onMounted(() => {
         <form class="flex flex-col gap-2 mt-3 add-todo-form" action="#" @submit.prevent="handleAddTodo">
             <label for="todo-title">Add Todo : </label>
             <div class="flex gap-2">
-                <input type="text" placeholder="Add your todo title..." id="todo-title" name="todo-title" v-model="todoTitle">
+                <input type="text" placeholder="Add your todo title..." id="todo-title" name="todo-title" v-model="todoTitle" required oninvalid="this.setCustomValidity('Todo title is required')"
+                oninput="this.setCustomValidity('')">
                 <button type="submit" class="add-todo-btn">Add Todo</button>
             </div>
         </form>
