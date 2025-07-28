@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
@@ -19,13 +18,13 @@ func Register(c *fiber.Ctx) error {
 
 	err := c.BodyParser(&userData)
 	if err != nil {
-		fmt.Println(err)
+		return c.Status(400).JSON(fiber.Map{"error": "Bad Request"})
 	}
 
 	//user_record.Username = username
 	bytes, err := bcrypt.GenerateFromPassword([]byte(userData.Password), bcrypt.DefaultCost)
 	if err != nil {
-		fmt.Println(err)
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	hashed_password := string(bytes)
 
@@ -36,7 +35,7 @@ func Register(c *fiber.Ctx) error {
 
 	result := database.DB.Create(&userRecord)
 	if result.Error != nil {
-		fmt.Println(result.Error)
+		return c.Status(400).JSON(fiber.Map{"error": "Bad Request"})
 	}
 
 	return c.JSON(fiber.Map{"message": "Account created successfully"})
@@ -50,7 +49,7 @@ func Login(c *fiber.Ctx) error {
 
 	err := c.BodyParser(&userData)
 	if err != nil {
-		fmt.Println(err)
+		return c.Status(400).JSON(fiber.Map{"error": "Bad Request"})
 	}
 
 	var userRecord models.UserModel
@@ -88,7 +87,7 @@ func AddTodo(c *fiber.Ctx) error {
 
 	err := c.BodyParser(&todo)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Bad request"})
+		return c.Status(400).JSON(fiber.Map{"error": "Bad request"})
 	}
 
 	var userRecord models.UserModel
@@ -129,7 +128,7 @@ func GetTodo(c *fiber.Ctx) error {
 
 	result = database.DB.Where("target_user_id = ?", userRecord.ID).Find(&todo)
 	if result.Error != nil {
-		fmt.Println(result.Error)
+		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
 	}
 
 	return c.Status(200).JSON(fiber.Map{"todos": todo})
@@ -167,7 +166,7 @@ func UpdateTodo(c *fiber.Ctx) error {
 	var todo models.Todo
 	err := c.BodyParser(&reqTodo)
 	if err != nil {
-		fmt.Println(err)
+		return c.Status(400).JSON(fiber.Map{"error": "Bad request"})
 	}
 
 	if user := c.Locals("user").(*jwt.Token); user == nil {
@@ -237,16 +236,13 @@ func ChangePassword(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Account not found"})
 	}
 
-	fmt.Println(reqBody.CurrentPassword)
-	fmt.Println(userRecord.Password)
-
 	err = bcrypt.CompareHashAndPassword([]byte(userRecord.Password), []byte(reqBody.CurrentPassword))
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized password"})
 	} else {
 		bytes, err := bcrypt.GenerateFromPassword([]byte(reqBody.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
-			fmt.Println(err)
+			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 		}
 		hashed_password := string(bytes)
 		userRecord.Password = hashed_password
