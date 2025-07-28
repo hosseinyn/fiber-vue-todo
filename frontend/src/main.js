@@ -7,7 +7,8 @@ import Home from './pages/Home.vue';
 import Login from './pages/Login.vue';
 import Signup from './pages/Signup.vue';
 import Dashboard from './pages/Dashboard.vue';
-import ChangePasssword from './pages/ChangePasssword.vue';
+import ChangePasssword from './pages/ChangePassword.vue';
+import Error404 from './pages/Error404.vue';
 
 import axios from 'axios';
 import Cookie from 'js-cookie'
@@ -17,7 +18,8 @@ const routes = [
   { path: '/login' , component: Login },
   { path: '/signup' , component: Signup},
   { path : '/dashboard' , component: Dashboard , meta: {requiresAuth : true}},
-  { path: '/change-password' , component: ChangePasssword , meta: {requiresAuth : true}}
+  { path: '/change-password' , component: ChangePasssword , meta: {requiresAuth : true}},
+  { path: '/:pathMatch(.*)*' , component: Error404 }
 ]
 
 const router = createRouter({
