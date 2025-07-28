@@ -230,10 +230,6 @@ func ChangePassword(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 
-	if name != reqBody.Username {
-		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized username"})
-	}
-
 	var userRecord models.UserModel
 
 	result := database.DB.Where("username = ?", name).First(&userRecord)

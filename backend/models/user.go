@@ -7,7 +7,6 @@ type UserModel struct {
 }
 
 type ChangePassword struct {
-	Username        string `json:"username"`
 	CurrentPassword string `json:"current_password"`
 	NewPassword     string `json:"new_password"`
 }
