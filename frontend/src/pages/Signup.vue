@@ -1,8 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useRouter } from 'vue-router';
+import { useRouter , RouterLink } from 'vue-router';
 
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
@@ -13,14 +12,13 @@ const router = useRouter()
 const usernameValue = ref("")
 const passwordValue = ref("")
 
-const handleLogin = async () => {
-    axios.post('http://127.0.0.1:4000/auth/login', {
+const handleSignup = async () => {
+    axios.post('http://127.0.0.1:4000/auth/register', {
     username: usernameValue.value,
     password: passwordValue.value
     })
     .then(function (response) {
-        Cookies.set("jwt" , response.data.token);
-        router.push("/")
+        router.push("/login");
     })
     .catch(function (error) {
         toast(error.response.data.error, {
@@ -46,9 +44,9 @@ const handleLogin = async () => {
                     <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1
                             class="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                            Log In
+                            Sign Up
                         </h1>
-                        <form class="space-y-4 md:space-y-6" action="#" @submit.prevent="handleLogin">
+                        <form class="space-y-4 md:space-y-6" action="#" @submit.prevent="handleSignup">
                             <div>
                                 <label for="username"
                                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username : </label>
@@ -67,9 +65,8 @@ const handleLogin = async () => {
                                 class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Sign
                                 in</button>
                             <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-                                Don’t have an account yet? <a href="#"
-                                    class="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign
-                                    up</a>
+                                Do you have an account? <RouterLink to="/login"
+                                    class="font-medium text-primary-600 hover:underline dark:text-primary-500">Log In</RouterLink>
                             </p>
                         </form>
                     </div>
