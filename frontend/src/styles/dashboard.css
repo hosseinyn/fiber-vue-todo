@@ -1,0 +1,32 @@
+.add-todo-btn {
+  width: 105px;
+  height: 34px;
+}
+
+label {
+  color: #fff;
+}
+
+.add-todo-form input {
+  color: #fff;
+  width: 230px;
+  height: 34px;
+  box-shadow: rgba(207, 210, 214, 0.4) 0px 0px 0px 2px, rgba(56, 62, 68, 0.65) 0px 4px 6px -1px, rgba(235, 231, 231, 0.302) 0px 1px 0px inset;
+  border-radius: 6px;
+  outline: none;
+  padding-left: 10px;
+}
+
+.todo-box {
+  min-width: 250px;
+  min-height: 45px;
+  box-shadow: rgba(207, 210, 214, 0.4) 0px 0px 0px 2px, rgba(56, 62, 68, 0.65) 0px 4px 6px -1px, rgba(235, 231, 231, 0.302) 0px 1px 0px inset;
+  border-radius: 7px;
+  padding: 10px;
+}
+
+.checked-todo {
+  -webkit-text-decoration: line-through dashed #ff0000;
+          text-decoration: line-through dashed #ff0000;
+  text-decoration-thickness: 3px;
+}/*# sourceMappingURL=dashboard.css.map */
