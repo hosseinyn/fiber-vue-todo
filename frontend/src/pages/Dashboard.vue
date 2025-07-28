@@ -2,6 +2,7 @@
 import '../styles/dashboard.css';
 import { ref , onMounted , reactive } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 import Cookie from 'js-cookie'
 
@@ -11,6 +12,8 @@ import Swal from 'sweetalert2';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTrash , faPencil , faCheck } from "@fortawesome/free-solid-svg-icons";
+
+const router = useRouter()
 
 const todoTitle = ref("")
 const Todos = ref([])
@@ -176,6 +179,40 @@ const handleCheckTodo = (id , content) => {
             })
 }
 
+const handleDeleteAccount = () => {
+    Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert your account.",
+            icon: "warning",
+            showCancelButton: true,
+            color : "#fff",
+            background : "#363636",
+            confirmButtonText: "Yes, delete my account."
+            }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete("http://127.0.0.1:4000/todos/delete-account" , {
+                    headers : {
+                        'Authorization' : `Bearer ${jwt_token}`
+                    }
+                })
+                .then(function (response) {
+                    router.push("/")
+                })
+                .catch(function (error) {
+                    toast(error.response.data.error, {
+                        "theme": "dark",
+                        "type": "error",
+                        "dangerouslyHTMLString": true
+                    })
+                })
+            }
+        });
+    }
+
+const handleChangePassword = () => {
+    router.push("/change-password")
+}
+
 onMounted(() => {
   listTodo()
 });
@@ -185,6 +222,11 @@ onMounted(() => {
 <template>
     <div class="flex flex-col items-center mt-10 gap-5">
         <h1 class="text-white text-3xl">Todos Dashboard</h1>
+
+        <div class="flex gap-3">
+            <button class="account-operation-btn" style="background-color: #ff0000;" @click="handleDeleteAccount">Delete Account</button>
+            <button class="account-operation-btn" @click="handleChangePassword">Change Password</button>
+        </div>
 
         <form class="flex flex-col gap-2 mt-3 add-todo-form" action="#" @submit.prevent="handleAddTodo">
             <label for="todo-title">Add Todo : </label>
