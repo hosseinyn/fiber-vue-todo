@@ -1,16 +1,29 @@
 <script setup>
-import { ref } from 'vue';
+import { ref , onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter , RouterLink } from 'vue-router';
+import Cookies from 'js-cookie'
 
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
 const router = useRouter()
 
-
 const usernameValue = ref("")
 const passwordValue = ref("")
+
+const handleUser = async () => {
+    const jwt_token = Cookies.get("jwt");
+    const res = await axios.get("http://127.0.0.1:4000/todos/check-token", {
+      headers: {
+        Authorization: `Bearer ${jwt_token}`
+      }
+    })
+
+    if (res.status === 200) {
+      router.push("/dashboard")
+    }
+}
 
 const handleSignup = async () => {
     axios.post('http://127.0.0.1:4000/auth/register', {
@@ -29,6 +42,9 @@ const handleSignup = async () => {
     });
 }
 
+onMounted(() => {
+    handleUser()
+})
 
 </script>
 

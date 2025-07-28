@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref , onMounted } from 'vue';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useRouter } from 'vue-router';
@@ -12,6 +12,19 @@ const router = useRouter()
 
 const usernameValue = ref("")
 const passwordValue = ref("")
+
+const handleUser = async () => {
+    const jwt_token = Cookies.get("jwt");
+    const res = await axios.get("http://127.0.0.1:4000/todos/check-token", {
+      headers: {
+        Authorization: `Bearer ${jwt_token}`
+      }
+    })
+
+    if (res.status === 200) {
+      router.push("/dashboard")
+    }
+}
 
 const handleLogin = async () => {
     axios.post('http://127.0.0.1:4000/auth/login', {
@@ -31,6 +44,9 @@ const handleLogin = async () => {
     });
 }
 
+onMounted(() => {
+    handleUser()
+})
 
 </script>
 
